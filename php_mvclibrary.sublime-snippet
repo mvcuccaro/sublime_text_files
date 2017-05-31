@@ -1,0 +1,116 @@
+<snippet>
+	<content><![CDATA[
+INCLUDE_ONCE('class.item_base.php');
+INCLUDE_ONCE('class.search_base.php');
+INCLUDE_ONCE('class.actions_base.php');
+
+class something_item_base extends item_base
+{
+	function getField(\$arg_field)
+	{
+		\$ret = null;
+		switch(\$arg_field)
+		{
+			default:
+				\$ret = \$this->fields[\$arg_field];
+				break;
+		}
+
+		return \$ret;
+	}
+}
+
+class something_list_item extends something_item_base
+{
+	function something_list_item(\$arg_fields)
+	{
+		\$this->fields = \$arg_fields;
+	}
+}
+
+class something_item_db extends something_item_base
+{
+	function setItemId(\$arg_item_id)
+	{
+		\$this->item_id = \$arg_item_id;
+	}
+
+	function _initItem()
+	{
+		\$query = 'SELECT * FROM something WHERE something_id = ' . \$this->item_id;
+		\$this->db->Query($query);
+		if( !\$this->db->ReadRow() )
+		{
+			return 0;
+		}
+		\$this->fields = \$this->db->RowData;
+		return 1;
+	}
+}
+
+class something_search extends search_base
+{
+	function _initSearch()
+	{
+		\$this->setLimit(50);
+	}
+
+	function _buildWhere()
+	{
+		if( isset(\$this->clause) && is_array(\$this->clause) ) { extract(\$this->clause); }
+		\$where = ' WHERE TRUE ';
+
+		return \$where;
+	}
+
+	function _buildOrderBy()
+	{
+		\$order_by = ' ORDER BY something_id DESC';
+		return \$order_by;
+	}
+
+	function search()
+	{
+		\$query = 'SELECT * FROM something ' . \$this->_buildWhere() . \$this->_buildOrderBy() . \$this->_buildLimit();
+		\$this->db->Query($query);
+		while( \$this->db->ReadRow() )
+		{
+			\$this->list[] = new something_list_item(\$this->db->RowData);
+		}
+	}
+}
+
+class something_actions extends actions_base
+{
+	function _initActions()
+	{
+		\$this->setTable('something');
+	}
+
+	function _universalValidate()
+	{
+		return true;
+	}
+
+	function _addValidate()
+	{
+		return true;
+	}
+
+	function _updateValidate()
+	{
+		return true;
+	}
+
+	function _deleteValidate()
+	{
+		return true;
+	}
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>mvclibrary</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.php</scope>
+</snippet>
